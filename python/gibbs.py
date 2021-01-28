@@ -86,7 +86,8 @@ class GibbsSampler:
                                       self.Likelihood.frequencies,
                                       self.Likelihood.binning)
         current_cmb = self.init_cmb
-
+        import time
+        st=time.time()
         accep_count = 0
         print("[gibbs] Running sampling for %d steps ..." % self.Nsteps)
         for i in range(self.Nsteps):
@@ -153,3 +154,4 @@ class GibbsSampler:
                 writer.writerow(line)
 
         np.savetxt(self.savepath + "acceptance.dat", accept_rates)
+        print("TIME/NSTEPS = {}/{}".format(time.time()-st, self.Nsteps))

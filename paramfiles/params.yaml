@@ -1,10 +1,10 @@
 # Paths
-data_path: "../../hillipop/modules/data/Hillipop/"
+data_path: "/sps/litebird/Users/alaposta/development/hillipop/modules/data/Hillipop/"
 spectra_path: "Data/NPIPE/spectra/"
-output_path: "../python_products/"
+output_path: "/sps/litebird/Users/alaposta/development/corr_coeff/python_products/"
 gibbs_path: "gibbs_inputs/"
 
-multipole_range_file: "../hillipop/modules/data/planck_2020/hillipop/data/binning_lowl_extended.fits"
+multipole_range_file: "/sps/litebird/Users/alaposta/development/corr_coeff/hillipop/modules/data/planck_2020/hillipop/data/binning_lowl_extended.fits"
 invcov_file: "cov/invfll_NPIPE_detset_extl_TTTEEE_bin.fits"
 binning_file: "binning_corr_coeff.fits"
 
@@ -12,7 +12,7 @@ init_cmb_file: "Cb_example.dat"
 A_file: "A.dat"
 cov_fg_file: "cov_fg.dat"
 
-chains_path: "../gibbs_results/"
+chains_path: "/sps/litebird/Users/alaposta/development/corr_coeff/gibbs_results/"
 
 # Parameters
 parameters:
