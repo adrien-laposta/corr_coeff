@@ -1,0 +1,121 @@
+# Paths
+data_path: "../../hillipop/modules/data/Hillipop/"
+spectra_path: "Data/NPIPE/spectra/"
+output_path: "../python_products/"
+gibbs_path: "gibbs_inputs/"
+
+multipole_range_file: "../hillipop/modules/data/planck_2020/hillipop/data/binning_lowl_extended.fits"
+invcov_file: "cov/invfll_NPIPE_detset_extl_TTTEEE_bin.fits"
+binning_file: "binning_corr_coeff.fits"
+
+init_cmb_file: "Cb_example.dat"
+A_file: "A.dat"
+
+chains_path: "../gibbs_results/"
+
+# Parameters
+parameters:
+
+  Aplanck:
+    init: 1
+    proposal: 0.0013/2
+    prior:
+      min: 0.958
+      max: 1.041
+
+  c0:
+    init: 0.0
+    proposal: 0.0009/2
+    prior:
+      min: -0.028
+      max: 0.028
+  c1:
+    init: 0.0
+    proposal: 0.0009/2
+    prior:
+      min: -0.031
+      max: 0.031
+
+  c3:
+    init: 0.0
+    proposal: 0.0008/2
+    prior:
+      min: -0.024
+      max: 0.024
+
+  c4:
+    init: 0.0
+    proposal: 0.0009/2
+    prior:
+      min: -0.028
+      max: 0.028
+
+  c5:
+    init: 0.0
+    proposal: 0.0009/2
+    prior:
+      min: -0.028
+      max: 0.028
+
+  Aradio:
+    init: 1.61984
+    proposal: 0.04/2
+    prior:
+      min: 0.29
+      max: 3.10
+
+  Adusty:
+    init: 0.781192
+    proposal: 0.03/2
+    prior:
+      min: 0
+      max: 2
+
+  AdustTT:
+    init: 1
+    proposal: 0.03/2
+    prior:
+      min: 0
+      max: 2
+
+  AdustPP:
+    init: 1
+    proposal: 0.05/2
+    prior:
+      min: 0
+      max: 2.5
+
+  AdustTP:
+    init: 1
+    proposal: 0.05/2
+    prior:
+      min: 0
+      max: 2.5
+
+  Asz:
+    init: 1
+    proposal: 0.08/2
+    prior:
+      min: 0
+      max: 3.88
+
+  Acib:
+    init: 1
+    proposal: 0.05/2
+    prior:
+      min: 0
+      max: 3
+
+  Aksz:
+    init: 0.6
+    proposal: 0.03/2
+    prior:
+      min: 0
+      max: 10
+
+  Aszxcib:
+    init: 1
+    proposal: 0.03/2
+    prior:
+      min: 0
+      max: 10
