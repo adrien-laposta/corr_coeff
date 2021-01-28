@@ -1,10 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import astropy.io.fits as fits
 from likelihoods import LikelihoodFg
 from gibbs import GibbsSampler
-from corr_coeff_utils import compute_spectra, set_multipole_range
-import os
 import yaml
 import sys
 
@@ -16,7 +12,9 @@ Ldict = {key : cdict[key] for key in cdict if (key in LikelihoodFg.__init__.__co
 Lclass = LikelihoodFg(**Ldict)
 
 Gdict = {key : cdict[key] for key in cdict if (key in GibbsSampler.__init__.__code__.co_varnames)}
-gibbs_sampler = GibbsSampler(3000, Lclass, **cdict)
+
+Nstep = 5000
+gibbs_sampler = GibbsSampler(Nstep, Lclass, **Gdict)
 gibbs_sampler.run()
 
 

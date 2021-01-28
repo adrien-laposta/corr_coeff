@@ -66,10 +66,11 @@ def get_full_fg_vec(pars, fgs, spectra_path, multipole_range,
                            np.concatenate(specfgEE),
                            np.concatenate(specfgTE))))
 
-def get_Cb_and_Q(A, vec_data, vec_fg, invcov):
-
-    invQ = (A.T).dot(invcov).dot(A)
-    Q = np.linalg.inv(invQ)
+def get_Cb_and_Q(A, vec_data, vec_fg, invcov, get_Q = True,Q=None):
+    
+    if get_Q:
+        invQ = (A.T).dot(invcov).dot(A)
+        Q = np.linalg.inv(invQ)
     Cb = Q.dot(A.T).dot(invcov).dot(vec_data - vec_fg)
 
     return(Cb, Q)

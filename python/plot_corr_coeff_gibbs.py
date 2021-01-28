@@ -56,7 +56,7 @@ Q_EEEE = Q[minEE:maxEE, minEE:maxEE][np.min(idEE):np.max(idEE)+1, np.min(idEE):n
 Q_EETE = Q[minEE:maxEE, minTE:maxTE][np.min(idEE):np.max(idEE)+1, np.min(idTE):np.max(idTE)+1]
 
 Q_TETE = Q[minTE:maxTE, minTE:maxTE][np.min(idTE):np.max(idTE)+1, np.min(idTE):np.max(idTE)+1]
-
+print(np.sqrt(Q_EEEE.diagonal())[np.where(ell_R>1500)])
 plt.figure()
 plt.plot(ell_R, cutEE/np.sqrt(Q_EEEE.diagonal()))
 plt.axhline(5,xmin=-100,xmax=2500)

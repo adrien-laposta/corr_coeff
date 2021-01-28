@@ -6,7 +6,8 @@ class LikelihoodFg:
 
     def __init__(self, data_path, invcov_file, output_path, spectra_path,
                  multipole_range_file, binning_file, parameters):
-
+        
+        print("[likelihood] Initializing ...")
         # Variables
         self.nmap = 6
         self.nfreq = 3
@@ -45,19 +46,19 @@ class LikelihoodFg:
         # Load invcovmat
         self.invcov = fits.getdata(output_path + invcov_file, hdu=0).field(0)
         N = int(np.sqrt(len(self.invcov)))
-        self.invcov = self.invcov.reshape(N, N) * 1e24
+        self.invcov = self.invcov.reshape(N, N) * 1e-24
 
 
         # Foregrounds computation
         self.fgs = get_foregrounds(data_path, self.lmax, self.frequencies)
-        self.dlweight = read_dl_xspectra(spectra_path, self.nmap,
+        self.dlweight = read_dl_xspectra(data_path + spectra_path, self.nmap,
                                          self.multipole_range, field = 2)
         self.dlweight[self.dlweight == 0] = np.inf
         self.dlweight = 1.0 / self.dlweight ** 2
 
         # Priors
-        self.priors = {key : [parameters[key]["prior"]["min"],
-                              parameters[key]["prior"]["max"]
+        self.priors = {key : [float(parameters[key]["prior"]["min"]),
+                              float(parameters[key]["prior"]["max"])
                              ] for key in parameters}
 
     def logprior(self, **pars):
@@ -70,13 +71,14 @@ class LikelihoodFg:
 
         return(1)
 
-    def logprob(self, C_CMB, **pars):
-
-        fgpars = pars.copy()
-        fgpars["c2"] = 0
-        fg_vec = get_full_fg_vec(fgpars, self.fgs, self.dlweight,
-                                 self.multipole_range, self.nmap,
-                                 self.nfreq, self.frequencies, self.binning)
+    def logprob(self, fg_vec, C_CMB, **pars):
+        
+        if fg_vec is None:
+            fgpars = pars.copy()
+            fgpars["c2"] = 0
+            fg_vec = get_full_fg_vec(fgpars, self.fgs, self.dlweight,
+                                     self.multipole_range, self.nmap,
+                                     self.nfreq, self.frequencies, self.binning)
 
         res = (self.data - (fg_vec + C_CMB))
 

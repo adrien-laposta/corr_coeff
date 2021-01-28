@@ -1,36 +1,40 @@
 import numpy as np
 import csv
-from get_corr_coeff_cmb_only import get_Cb_and_Q
+from get_corr_coeff_cmb_only import get_Cb_and_Q, get_full_fg_vec
 from corr_coeff_utils import *
 
 class GibbsSampler:
 
     def __init__(self, Nsteps, Likelihood, chains_path, gibbs_path, output_path, A_file,
-                 init_cmb_file, parameters):
-
+                 init_cmb_file,cov_fg_file, parameters):
+        
+        print("[gibbs] Initializing ...")
         ## MCMC
         self.Nsteps = Nsteps
         self.savepath = chains_path
         if not os.path.exists(self.savepath):
             os.makedirs(self.savepath)
 
-        # Data
-        self.A = A
-        self.init_cmb = np.loadtxt(output_path + gibbs_path + init_cmb_file)
-        A = np.loadtxt(output_path + gibbs_path + A_file)
         # Parameters
-        self.init_pars = {key : parameters[key]["init"] for key in parameters}
-        self.proposals = {key : parameters[key]["proposal"] for key in parameters}
+        self.init_pars = {key : float(parameters[key]["init"]) for key in parameters}
+        self.proposals = {key : float(parameters[key]["proposal"]) for key in parameters}
         self.par_keys = list(parameters.keys())
-
-
-        self.init_cmb = init_cmb
 
         # Likelihoods and priors
         self.Likelihood = Likelihood
         self.logprob = Likelihood.logprob
         self.logprior = Likelihood.logprior
 
+        # Data
+        self.A = np.loadtxt(output_path + gibbs_path + A_file)
+        self.init_cmb = np.loadtxt(output_path + gibbs_path + init_cmb_file)
+        self.invQ = (self.A.T).dot(self.Likelihood.invcov).dot(self.A)
+        self.Q = np.linalg.inv(self.invQ)
+
+        try:
+            self.cov_fg = np.loadtxt(output_path + gibbs_path + cov_fg_file)
+        except:
+            self.cov_fg = 'None'
         with open(self.savepath + "chains.dat", "w") as file:
             writer = csv.writer(file)
             writer.writerow(self.par_keys + ["logp"])
@@ -49,11 +53,19 @@ class GibbsSampler:
     def proposal(self, last_point):
 
         prop_dict = {}
-        for parname in self.par_keys:
 
-            mean = last_point[parname]
-            std = self.proposals[parname]
-            prop_dict[parname] = np.random.normal(mean, std)
+            #for parname in self.par_keys:
+
+                #mean = last_point[parname]
+                #std = self.proposals[parname]
+                #prop_dict[parname] = np.random.normal(mean, std)
+            
+        mean = [last_point[parname] for parname in self.par_keys]
+        rcov = pow(2.38, 2) * self.cov_fg / len(mean)
+        prop_vec = mean + svd_pow(rcov, 0.5).dot(np.random.randn(len(mean)))
+        for i, parname in enumerate(self.par_keys):
+
+            prop_dict[parname] = prop_vec[i]
 
         return(prop_dict)
 
@@ -76,37 +88,38 @@ class GibbsSampler:
         current_cmb = self.init_cmb
 
         accep_count = 0
-
-        print("Running sampling for %d steps ..." % self.Nsteps)
+        print("[gibbs] Running sampling for %d steps ..." % self.Nsteps)
         for i in range(self.Nsteps):
 
             if i != 0 and (i%(self.Nsteps/10) == 0 or i == self.Nsteps - 1):
 
-                print("Accepted samples : %d" % accep_rate)
-                print("Acceptance rate : %.03f" % (accep_rate / i))
-                print("Current logL : %.05f" % (current_like))
+                print("[gibbs] Accepted samples : %d" % accep_count)
+                print("[gibbs] Acceptance rate : %.03f" % (accep_count / i))
+                print("[gibbs] Current logL : %.05f" % (current_like))
 
             new_point = self.proposal(current_point)
-
-            # Current state (only for i == 0)
-            if i == 0:
-
-                current_like, _ = self.logprob(self.A.dot(current_cmb),
-                                               **current_point)
-                current_prior = self.logprior(**current_point)
+            
+            # Current state 
+            current_like, _ = self.logprob(fg_vec = current_fg, 
+                                           C_CMB = self.A.dot(current_cmb),
+                                           **current_point)
+            current_prior = self.logprior(**current_point)
 
             # New state (from current state CMB)
-            new_like, new_fg = self.logprob(self.A.dot(current_cmb), **new_point)
+            new_like, new_fg = self.logprob(fg_vec = None,
+                                            C_CMB = self.A.dot(current_cmb), 
+                                            **new_point)
             new_prior = self.logprior(**new_point)
 
+            #print(new_like, current_like,self.acceptance(current_like + current_prior,new_like + new_prior))
             if (self.acceptance(current_like + current_prior,
                                 new_like + new_prior)):
-
-                # Compute new cmb state only if the new fg sample was accepted
-                # (otherwise we already have the current cmb)
-                Cb, Q = get_Cb_and_Q(self.A, self.Likelihood.data,
-                                     new_fg, self.Likelihood.invcov)
-                sqQ = svd_pow(Q, 0.5)
+                
+                # Compute new cmb state using current fg
+                Cb, _ = get_Cb_and_Q(self.A, self.Likelihood.data,
+                                     new_fg, self.Likelihood.invcov,
+                                     get_Q=False, Q=self.Q)
+                sqQ = svd_pow(self.Q, 0.5)
                 new_cmb = Cb + sqQ.dot(np.random.randn(len(Cb)))
 
                 # Set accepted point to current point
@@ -127,7 +140,7 @@ class GibbsSampler:
                 cmb_accepted.append(current_cmb)
 
             accept_rates.append(accep_count / (i + 1))
-
+        
         # Saving accepted samples in files
         with open(self.savepath + "chains.dat", "a") as file:
             writer = csv.writer(file)
