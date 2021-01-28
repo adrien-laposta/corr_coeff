@@ -1,66 +1,83 @@
 import numpy as np
+from get_corr_coeff_cmb_only import get_full_fg_vec
+from corr_coeff_utils import *
 
-class Likelihood:
+class LikelihoodFg:
 
-    def __init__(self, data):
+    def __init__(self, data_path, invcov_file, output_path, spectra_path,
+                 multipole_range_file, binning_file, parameters):
 
-        self.data = data
+        # Variables
+        self.nmap = 6
+        self.nfreq = 3
+        self.frequencies = [100,100,143,143,217,217]
+        self.lmax = 2500
+
+        # Binning
+        self.binning = fits.getdata(output_path + binning_file, hdu = 0).field(0)
+
+        # Multipole ranges
+        self.multipole_range = set_multipole_range(multipole_range_file)
+
+        # Data
+        _, CellTT, _ = compute_spectra(self.nmap, self.nfreq,
+                                                self.frequencies, 0,
+                                                self.multipole_range,
+                                                data_path + spectra_path,
+                                                self.binning)
+
+        _, CellEE, _ = compute_spectra(self.nmap, self.nfreq,
+                                                self.frequencies, 1,
+                                                self.multipole_range,
+                                                data_path + spectra_path,
+                                                self.binning)
+
+        _, CellTE, _ = compute_spectra(self.nmap, self.nfreq,
+                                                self.frequencies, 2,
+                                                self.multipole_range,
+                                                data_path + spectra_path,
+                                                self.binning)
+
+        self.data = np.concatenate((np.concatenate(CellTT),
+                                   np.concatenate(CellEE),
+                                   np.concatenate(CellTE)))
+
+        # Load invcovmat
+        self.invcov = fits.getdata(output_path + invcov_file, hdu=0).field(0)
+        N = int(np.sqrt(len(self.invcov)))
+        self.invcov = self.invcov.reshape(N, N) * 1e24
+
+
+        # Foregrounds computation
+        self.fgs = get_foregrounds(data_path, self.lmax, self.frequencies)
+        self.dlweight = read_dl_xspectra(spectra_path, self.nmap,
+                                         self.multipole_range, field = 2)
+        self.dlweight[self.dlweight == 0] = np.inf
+        self.dlweight = 1.0 / self.dlweight ** 2
+
+        # Priors
+        self.priors = {key : [parameters[key]["prior"]["min"],
+                              parameters[key]["prior"]["max"]
+                             ] for key in parameters}
 
     def logprior(self, **pars):
 
-        for key in pars.keys():
-            if pars[key] <= 0:
+        for key in pars:
+            if (pars[key] < self.priors[key][0]) or (
+                pars[key] > self.priors[key][1]):
+
                 return(-np.inf)
 
         return(1)
 
-    def logprob(self, **pars):
+    def logprob(self, C_CMB, **pars):
 
-        return(np.sum(-np.log(pars["sig"] * np.sqrt(2 * np.pi)) - ((self.data - pars["mu"]) ** 2) / (2 * pars["sig"] ** 2)))
+        fgpars = pars.copy()
+        fgpars["c2"] = 0
+        fg_vec = get_full_fg_vec(fgpars, self.fgs, self.dlweight,
+                                 self.multipole_range, self.nmap,
+                                 self.nfreq, self.frequencies, self.binning)
 
-class LikelihoodFg:
+        res = (self.data - (fg_vec + C_CMB))
 
-    def __init__(self, data, invcov):
-
-        self.data = data
-        self.invcov = invcov
-
-    def logprior(self, **pars):
-
-        if pars["Aplanck"] < 0.958 or pars["Aplanck"] > 1.041:
-            return(-np.inf)
-        if np.abs(pars["c0"]) > 0.028:
-            return(-np.inf)
-        if np.abs(pars["c1"]) > 0.031:
-            return(-np.inf)
-        if np.abs(pars["c3"]) > 0.024:
-            return(-np.inf)
-        if np.abs(pars["c4"]) > 0.028:
-            return(-np.inf)
-        if np.abs(pars["c5"]) > 0.028:
-            return(-np.inf)
-        if pars["Aradio"] < 0.29 or pars["Aradio"] > 3.10:
-            return(-np.inf)
-        if pars["Adusty"] < 0 or pars["Adusty"] > 2:
-            return(-np.inf)
-        if pars["AdustTT"] < 0 or pars["AdustTT"] > 2:
-            return(-np.inf)
-        if pars["AdustPP"] < 0 or pars["AdustPP"] > 2.5:
-            return(-np.inf)
-        if pars["AdustTP"] < 0 or pars["AdustTP"] > 2.5:
-            return(-np.inf)
-        if pars["Asz"] < 0 or pars["Asz"] > 3.88:
-            return(-np.inf)
-        if pars["Acib"] < 0 or pars["Acib"] > 3:
-            return(-np.inf)
-        if pars["Aksz"] < 0 or pars["Aksz"] > 10:
-            return(-np.inf)
-        if pars["Aszxcib"] < 0 or pars["Aszxcib"] > 10:
-            return(-np.inf)
-            
-        return(1)
-
-    def logprob(self, C_CMB, vec_fg, invcov):
-        res = (self.data - (vec_fg + C_CMB))
-
-        return(-0.5 * res.dot(invcov).dot(res))
+        return(-0.5 * res.dot(self.invcov).dot(res), fg_vec)

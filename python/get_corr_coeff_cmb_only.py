@@ -19,7 +19,7 @@ def get_ell_cmb(lims, binning):
     return(ell_cmb)
 
 def get_A_matrix(ell_cmb, ell_data):
-    
+
     ell_vec = np.concatenate((ell_data))
     A = []
     for i, ell in enumerate(ell_vec):
@@ -38,7 +38,7 @@ def get_full_A_matrix(ells, lims, binning):
     ell_cmbTT = get_ell_cmb(limsTT, binning)
     ell_cmbEE = get_ell_cmb(limsEE, binning)
     ell_cmbTE = get_ell_cmb(limsTE, binning)
-    
+
     ell_cmb = np.concatenate((ell_cmbTT,
                               ell_cmbEE,
                               ell_cmbTE))
@@ -46,10 +46,10 @@ def get_full_A_matrix(ells, lims, binning):
     ATT = get_A_matrix(ell_cmbTT, ellTT)
     AEE = get_A_matrix(ell_cmbEE, ellEE)
     ATE = get_A_matrix(ell_cmbTE, ellTE)
-    
+
     from scipy.linalg import block_diag
     A = block_diag(ATT, AEE, ATE)
-    
+
     return(ell_cmb, A)
 
 def get_full_fg_vec(pars, fgs, spectra_path, multipole_range,
@@ -62,18 +62,19 @@ def get_full_fg_vec(pars, fgs, spectra_path, multipole_range,
     _, specfgTE, _ = get_fg_xfreq_vec(pars, fgs, spectra_path, multipole_range,
                                       nmap, nfreq, frequencies, 2, binning)
 
-    return(np.concatenate((np.concatenate(specfgTT), 
-                           np.concatenate(specfgEE), 
-                           np.concatenate(specfgTE)
-                          )))
+    return(np.concatenate((np.concatenate(specfgTT),
+                           np.concatenate(specfgEE),
+                           np.concatenate(specfgTE))))
 
 def get_Cb_and_Q(A, vec_data, vec_fg, invcov):
-    
+
     invQ = (A.T).dot(invcov).dot(A)
     Q = np.linalg.inv(invQ)
     Cb = Q.dot(A.T).dot(invcov).dot(vec_data - vec_fg)
-    
+
     return(Cb, Q)
+
+    
 a="""
 # PATHS
 data_path = "../../hillipop/modules/data/Hillipop/"
@@ -132,7 +133,7 @@ pars = {"Aplanck": 9.997e-1,
 
 # A MATRIX
 print("Get A matrix ...")
-ell_cmb, A = get_full_A_matrix([ellTT, ellEE, ellTE], 
+ell_cmb, A = get_full_A_matrix([ellTT, ellEE, ellTE],
                                [limsTT, limsEE, limsTE],
                                binning)
 
