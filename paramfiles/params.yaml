@@ -12,7 +12,7 @@ init_cmb_file: "Cb_example.dat"
 A_file: "A.dat"
 cov_fg_file: "cov_fg.dat"
 
-chains_path: "/sps/litebird/Users/alaposta/development/corr_coeff/gibbs_results/"
+chains_path: "/sps/litebird/Users/alaposta/development/corr_coeff/gibbs_results2/"
 
 # Parameters
 parameters:

@@ -142,16 +142,23 @@ class GibbsSampler:
 
             accept_rates.append(accep_count / (i + 1))
         
-        # Saving accepted samples in files
-        with open(self.savepath + "chains.dat", "a") as file:
-            writer = csv.writer(file)
-            for line in accepted:
-                writer.writerow(line)
+            # Saving accepted samples in files every 500 steps
+            # or at the end of computation
+            if i!=0 and (i%500 == 0 or i == self.Nsteps-1):
 
-        with open(self.savepath + "cmb.dat", "w") as file:
-            writer = csv.writer(file)
-            for line in cmb_accepted:
-                writer.writerow(line)
+                with open(self.savepath + "chains.dat", "a") as file:
+                    writer = csv.writer(file)
+                    for line in accepted:
+                        writer.writerow(line)
+        #np.savetxt(self.savepath + "chains.dat", np.array(accepted))
+                with open(self.savepath + "cmb.dat", "a") as file:
+                    writer = csv.writer(file)
+                    for line in cmb_accepted:
+                        writer.writerow(line)
+        #np.savetxt(self.savepath + "cmb.dat", np.array(cmb_accepted))
 
-        np.savetxt(self.savepath + "acceptance.dat", accept_rates)
+                np.savetxt(self.savepath + "acceptance.dat", accept_rates)
+                accepted = []
+                cmb_accepted = []
+
         print("TIME/NSTEPS = {}/{}".format(time.time()-st, self.Nsteps))

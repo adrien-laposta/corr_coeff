@@ -13,7 +13,7 @@ Lclass = LikelihoodFg(**Ldict)
 
 Gdict = {key : cdict[key] for key in cdict if (key in GibbsSampler.__init__.__code__.co_varnames)}
 
-Nstep = 500
+Nstep = 50000
 gibbs_sampler = GibbsSampler(Nstep, Lclass, **Gdict)
 gibbs_sampler.run()
 
