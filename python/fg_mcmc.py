@@ -3,8 +3,15 @@ from likelihoods import LikelihoodFg
 from gibbs import GibbsSampler
 import yaml
 import sys
+import argparse
 
-yaml_file = sys.argv[1]
+parser = argparse.ArgumentParser()
+parser.add_argument("--resume", help = "Specify if you want to resume sampling", action = "store_true")
+parser.add_argument("-y", "--yaml", help = "Specify yaml file")
+args = parser.parse_args()
+
+
+yaml_file = args.yaml
 with open(yaml_file) as yml:
     cdict = yaml.load(yml, Loader = yaml.FullLoader)
 
@@ -13,8 +20,8 @@ Lclass = LikelihoodFg(**Ldict)
 
 Gdict = {key : cdict[key] for key in cdict if (key in GibbsSampler.__init__.__code__.co_varnames)}
 
-Nstep = 50000
-gibbs_sampler = GibbsSampler(Nstep, Lclass, **Gdict)
+Nstep = 30000
+gibbs_sampler = GibbsSampler(Nstep, Lclass, args.resume, **Gdict)
 gibbs_sampler.run()
 
 

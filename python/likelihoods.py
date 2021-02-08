@@ -57,26 +57,49 @@ class LikelihoodFg:
         self.dlweight = 1.0 / self.dlweight ** 2
 
         # Priors
-        self.priors = {key : [float(parameters[key]["prior"]["min"]),
-                              float(parameters[key]["prior"]["max"])
-                             ] for key in parameters}
+        self.sampled_par_keys = []
+        for key in parameters:
+            if not "value" in parameters[key]:
+                self.sampled_par_keys.append(key)
+        self.prior_type = {key : parameters[key]["prior"]["type"]
+                           for key in self.sampled_par_keys}
+        self.priors = {}
+        for key in self.sampled_par_keys:
+            if self.prior_type[key] == "flat":
+                self.priors[key] = [float(parameters[key]["prior"]["min"]),
+                                    float(parameters[key]["prior"]["max"])]
+            elif self.prior_type[key] == "norm":
+                self.priors[key] = [float(parameters[key]["prior"]["mean"]),
+                                    float(parameters[key]["prior"]["std"])]
+
+        #self.priors = {key : [float(parameters[key]["prior"]["min"]),
+                              #float(parameters[key]["prior"]["max"])
+                             #] for key in parameters}
 
     def logprior(self, **pars):
-
-        for key in pars:
-            if (pars[key] < self.priors[key][0]) or (
-                pars[key] > self.priors[key][1]):
-
+        
+        def flat_logp(param, pmin, pmax):
+            if (param < pmin) or (param > pmax):
                 return(-np.inf)
+            else:
+                return(1)
 
-        return(1)
+        def norm_logp(param, mean, std):
+            #return(-0.5*np.log(2*np.pi*pow(std,2)) - 0.5 * pow((param - mean)/std, 2))
+            return(-0.5 * pow((param-mean)/std,2))
+        log_prior = 0
+        for key in pars:
+            if self.prior_type[key] == "norm":
+                log_prior += norm_logp(pars[key], self.priors[key][0], self.priors[key][1])
+            elif self.prior_type[key] == "flat":
+                log_prior += flat_logp(pars[key], self.priors[key][0], self.priors[key][1])
+
+        return(log_prior)
 
     def logprob(self, fg_vec, C_CMB, **pars):
         
         if fg_vec is None:
-            fgpars = pars.copy()
-            fgpars["c2"] = 0
-            fg_vec = get_full_fg_vec(fgpars, self.fgs, self.dlweight,
+            fg_vec = get_full_fg_vec(pars, self.fgs, self.dlweight,
                                      self.multipole_range, self.nmap,
                                      self.nfreq, self.frequencies, self.binning)
 

@@ -58,9 +58,9 @@ Q_EETE = Q[minEE:maxEE, minTE:maxTE][np.min(idEE):np.max(idEE)+1, np.min(idTE):n
 Q_TETE = Q[minTE:maxTE, minTE:maxTE][np.min(idTE):np.max(idTE)+1, np.min(idTE):np.max(idTE)+1]
 print(np.sqrt(Q_EEEE.diagonal())[np.where(ell_R>1500)])
 plt.figure()
-plt.plot(ell_R, cutEE/np.sqrt(Q_EEEE.diagonal()))
-plt.axhline(5,xmin=-100,xmax=2500)
-#plt.errorbar(ell_R, cutEE, yerr=np.sqrt(Q_EEEE.diagonal()))
+#plt.plot(ell_R, cutEE/np.sqrt(Q_EEEE.diagonal()))
+#plt.axhline(5,xmin=-100,xmax=2500)
+plt.errorbar(ell_R, cutTT, yerr=np.sqrt(Q_TTTT.diagonal()))
 plt.show()
 R = cutTE / np.sqrt(cutEE * cutTT)
 
@@ -114,7 +114,9 @@ ls_b = ls_b[idR]
 Rbf_b = Rbf_b[idR]
 ls = ls[int(np.min(ell_R)):int(np.max(ell_R))]
 Rbf = Rbf[int(np.min(ell_R)):int(np.max(ell_R))]
-
+plt.figure()
+plt.plot(ls, np.arccos(Rbf)*180/np.pi)
+plt.show()
 chi2 = (R_unb - Rbf_b).dot(np.linalg.inv(cov_R)).dot(R_unb - Rbf_b)
 chi2 = round(chi2, 2)
 fig = plt.figure(figsize = (7, 6))

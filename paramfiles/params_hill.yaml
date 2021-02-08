@@ -1,0 +1,143 @@
+# Paths
+data_path: "/sps/litebird/Users/alaposta/development/hillipop/modules/data/Hillipop/"
+spectra_path: "Data/NPIPE/spectra/"
+output_path: "/sps/litebird/Users/alaposta/development/corr_coeff/python_products/"
+gibbs_path: "gibbs_inputs/"
+
+multipole_range_file: "/sps/litebird/Users/alaposta/development/corr_coeff/hillipop/modules/data/planck_2020/hillipop/data/binning_lowl_extended.fits"
+invcov_file: "cov/invfll_NPIPE_detset_extl_TTTEEE_bin.fits"
+binning_file: "binning_corr_coeff.fits"
+
+init_cmb_file: "Cb_example.dat"
+A_file: "A.dat"
+cov_fg_file: "cov_fg.dat"
+
+chains_path: "/sps/litebird/Users/alaposta/development/corr_coeff/gibbs_v5/"
+
+# Parameters
+parameters:
+
+  Aplanck:
+    init: 1
+    proposal: 0.0006
+    prior:
+      type: norm
+      mean: 1.0
+      std: 0.0025
+
+  c0:
+    init: 0.0
+    proposal: 0.0005
+    prior:
+      type: norm
+      mean: 0.0
+      std: 0.002
+
+  c1:
+    init: 0.0
+    proposal: 0.0005
+    prior:
+      type: norm
+      mean: 0.0
+      std: 0.002
+
+  c2:
+    value: 0.0
+
+  c3:
+    init: 0.0
+    proposal: 0.0005
+    prior:
+      type: norm
+      mean: 0.0
+      std: 0.002
+
+  c4:
+    init: 0.0
+    proposal: 0.0005
+    prior:
+      type: norm
+      mean: 0.0
+      std: 0.002
+
+  c5:
+    init: 0.0
+    proposal: 0.0005
+    prior:
+      type: norm
+      mean: 0.0
+      std: 0.002
+
+  Aradio:
+    init: 1.61984
+    proposal: 0.025
+    prior:
+      type: norm
+      mean: 1.61984
+      std: 0.2
+
+  Adusty:
+    init: 0.781192
+    proposal: 0.02
+    prior:
+      type: norm
+      mean: 0.781192
+      std: 0.2
+
+  AdustTT:
+    init: 1
+    proposal: 0.015
+    prior:
+      type: norm
+      mean: 1.0
+      std: 0.2
+
+  AdustPP:
+    init: 1
+    proposal: 0.025
+    prior:
+      type: norm
+      mean: 1.0
+      std: 0.2
+
+  AdustTP:
+    init: 1
+    proposal: 0.025
+    prior:
+      type: norm
+      mean: 1.0
+      std: 0.2
+
+  Asz:
+    init: 1
+    proposal: 0.04
+    prior:
+      type: norm
+      mean: 1.0
+      std: 0.2
+
+  Acib:
+    init: 1
+    proposal: 0.025
+    prior:
+      type: norm
+      mean: 1.0
+      std: 0.2
+
+  Aksz:
+    value: 0
+    init: 0.6
+    proposal: 0.015
+    prior:
+      type: flat
+      min: 0
+      max: 10
+
+  Aszxcib:
+    value: 0
+    init: 1
+    proposal: 0.015
+    prior:
+      type: flat
+      min: 0
+      max: 10
