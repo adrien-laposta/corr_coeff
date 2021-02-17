@@ -77,8 +77,8 @@ if not os.path.exists(output_path):
     os.makedirs(output_path)
 
 # save paths for binning & covariance matrix
-save_bin_invcov = output_path + 'invfll_NPIPE_detset_extl_TTTEEE_bin.fits'
-save_bin_cov = output_path + 'fll_NPIPE_detset_extl_TTTEEE_bin.fits'
+save_bin_invcov = output_path + 'invfll_NPIPE_detset_extl_TT_bin.fits'
+save_bin_cov = output_path + 'fll_NPIPE_detset_extl_TT_bin.fits'
 save_binning = output_path + '../binning_corr_coeff.fits'
 
 
@@ -96,7 +96,7 @@ col = [fits.Column(name = 'binning', format = 'D', array = binning)]
 hdulist=fits.BinTableHDU.from_columns(col)
 hdulist.writeto(save_binning, overwrite=True)
 
-modes = ["TT", "EE", "TE"]
+modes = ["TT"]
 lmax = 2500
 
 multipole_range = set_multipole_range(binning_path)

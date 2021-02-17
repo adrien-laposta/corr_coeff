@@ -53,7 +53,7 @@ def get_full_A_matrix(ells, lims, binning):
     return(ell_cmb, A)
 
 def get_full_fg_vec(pars, fgs, spectra_path, multipole_range,
-                    nmap, nfreq, frequencies, binning):
+                    nmap, nfreq, frequencies, binning, mode = "all"):
 
     _, specfgTT, _ = get_fg_xfreq_vec(pars, fgs, spectra_path, multipole_range,
                                       nmap, nfreq, frequencies, 0, binning)
@@ -61,10 +61,17 @@ def get_full_fg_vec(pars, fgs, spectra_path, multipole_range,
                                       nmap, nfreq, frequencies, 1, binning)
     _, specfgTE, _ = get_fg_xfreq_vec(pars, fgs, spectra_path, multipole_range,
                                       nmap, nfreq, frequencies, 2, binning)
-
-    return(np.concatenate((np.concatenate(specfgTT),
-                           np.concatenate(specfgEE),
-                           np.concatenate(specfgTE))))
+    
+    if mode == "tt":
+        return(np.concatenate(specfgTT))
+    elif mode == "ee":
+        return(np.concatenate(specfgEE))
+    elif mode == "te":
+        return(np.concatenate(specfgTE))
+    elif mode == "all":
+        return(np.concatenate((np.concatenate(specfgTT),
+                               np.concatenate(specfgEE),
+                               np.concatenate(specfgTE))))
 
 def get_Cb_and_Q(A, vec_data, vec_fg, invcov, get_Q = True,Q=None):
     
@@ -76,109 +83,111 @@ def get_Cb_and_Q(A, vec_data, vec_fg, invcov, get_Q = True,Q=None):
     return(Cb, Q)
 
     
-a="""
-# PATHS
-data_path = "../../hillipop/modules/data/Hillipop/"
-spectra_path = data_path + "Data/NPIPE/spectra/"
-output_path = "../python_products/"
+def main():
+    # PATHS
+    data_path = "../../hillipop/modules/data/Hillipop/"
+    spectra_path = data_path + "Data/NPIPE/spectra/"
+    output_path = "../python_products/"
 
-# FILES
-multipole_range_file = "../hillipop/modules/data/planck_2020/hillipop/data/binning_lowl_extended.fits"
-invcov_file = output_path + "cov/invfll_NPIPE_detset_extl_TTTEEE_bin.fits"
-binning_file = "../python_products/binning_corr_coeff.fits"
+    # FILES
+    multipole_range_file = "../hillipop/modules/data/planck_2020/hillipop/data/binning_lowl_extended.fits"
+    invcov_file = output_path + "cov/invfll_NPIPE_detset_extl_TTTEEE_bin.fits"
+    binning_file = "../python_products/binning_corr_coeff.fits"
 
-# USEFUL PARAMETERS
-nmap = 6
-nfreq = 3
-lmax = 2500
-frequencies = [100, 100, 143, 143, 217, 217]
+    # USEFUL PARAMETERS
+    nmap = 6
+    nfreq = 3
+    lmax = 2500
+    frequencies = [100, 100, 143, 143, 217, 217]
 
-# CL COVARIANCE
-invcov = fits.getdata(invcov_file, hdu=0).field(0)
-N = int(np.sqrt(len(invcov)))
-invcov = invcov.reshape(N, N)
-invcov *= 1e-24 # K to muK
+    # CL COVARIANCE
+    invcov = fits.getdata(invcov_file, hdu=0).field(0)
+    N = int(np.sqrt(len(invcov)))
+    invcov = invcov.reshape(N, N)
+    invcov *= 1e-24 # K to muK
 
-# BINNING FILE
-binning = fits.getdata(binning_file ,hdu = 0).field(0)
+    # BINNING FILE
+    binning = fits.getdata(binning_file ,hdu = 0).field(0)
 
-# MULTIPOLE RANGE
-multipole_range = set_multipole_range(multipole_range_file)
+    # MULTIPOLE RANGE
+    multipole_range = set_multipole_range(multipole_range_file)
 
-# READ BINNED PS
-print("Reading PS from file ...")
-ellTT, CellTT, limsTT = compute_spectra(nmap, nfreq, frequencies, 0,
+    # READ BINNED PS
+    print("Reading PS from file ...")
+    ellTT, CellTT, limsTT = compute_spectra(nmap, nfreq, frequencies, 0,
                                         multipole_range, spectra_path, binning)
-ellEE, CellEE, limsEE = compute_spectra(nmap, nfreq, frequencies, 1,
+    ellEE, CellEE, limsEE = compute_spectra(nmap, nfreq, frequencies, 1,
                                         multipole_range, spectra_path, binning)
-ellTE, CellTE, limsTE = compute_spectra(nmap, nfreq, frequencies, 2,
+    ellTE, CellTE, limsTE = compute_spectra(nmap, nfreq, frequencies, 2,
                                         multipole_range, spectra_path, binning)
 
-# EXAMPLE NUISANCE PARAMETERS
-pars = {"Aplanck": 9.997e-1,
-        "c0": 7.064e-4,
-        "c1": 4.000e-3,
-        "c2": 0,
-        "c3": -6.344e-4,
-        "c4": -1.432e-3,
-        "c5": -2.863e-3,
-        "Aradio": 1.698,
-        "Adusty": 6.258e-1,
-        "AdustTT": 8.649e-1,
-        "AdustPP": 1.156,
-        "AdustTP": 1.092,
-        "Asz": 1.155,
-        "Acib": 1.070,
-        "Aksz": 1.24e-2,
-        "Aszxcib": 1.264}
+    # EXAMPLE NUISANCE PARAMETERS
+    pars = {"Aplanck": 9.997e-1,
+            "c0": 7.064e-4,
+            "c1": 4.000e-3,
+            "c2": 0,
+            "c3": -6.344e-4,
+            "c4": -1.432e-3,
+            "c5": -2.863e-3,
+            "Aradio": 1.698,
+            "Adusty": 6.258e-1,
+            "AdustTT": 8.649e-1,
+            "AdustPP": 1.156,
+            "AdustTP": 1.092,
+            "Asz": 1.155,
+            "Acib": 1.070,
+            "Aksz": 1.24e-2,
+            "Aszxcib": 1.264}
 
-# A MATRIX
-print("Get A matrix ...")
-ell_cmb, A = get_full_A_matrix([ellTT, ellEE, ellTE],
+    # A MATRIX
+    print("Get A matrix ...")
+    ell_cmb, A = get_full_A_matrix([ellTT, ellEE, ellTE],
                                [limsTT, limsEE, limsTE],
                                binning)
 
-# SAVE INPUTS FOR GIBBS
-gibbs_path = output_path + "gibbs_inputs/"
-if not os.path.exists(gibbs_path):
-    os.makedirs(gibbs_path)
-np.savetxt(gibbs_path + "ell_cmb.dat", ell_cmb)
-np.savetxt(gibbs_path + "A.dat", A)
+    # SAVE INPUTS FOR GIBBS
+    gibbs_path = output_path + "gibbs_inputs/"
+    if not os.path.exists(gibbs_path):
+        os.makedirs(gibbs_path)
+    np.savetxt(gibbs_path + "ell_cmb.dat", ell_cmb)
+    np.savetxt(gibbs_path + "A.dat", A)
 
 
 
-fgs = get_foregrounds(data_path, lmax, frequencies)
-vec_fg = get_full_fg_vec(pars, fgs, spectra_path, multipole_range,
-                         nmap, nfreq, frequencies, binning)
-vec_data = np.concatenate((np.concatenate(CellTT),
-                           np.concatenate(CellEE),
-                           np.concatenate(CellTE)))
+    fgs = get_foregrounds(data_path, lmax, frequencies)
+    vec_fg = get_full_fg_vec(pars, fgs, spectra_path, multipole_range,
+                             nmap, nfreq, frequencies, binning)
+    vec_data = np.concatenate((np.concatenate(CellTT),
+                               np.concatenate(CellEE),
+                               np.concatenate(CellTE)))
 
-# MEAN AND COVARIANCE COMPUTATION
-print("Compute mean and covariance")
-Cb, Q = get_Cb_and_Q(A, vec_data, vec_fg, invcov)
-np.savetxt(gibbs_path + "Cb_example.dat", Cb)
-np.savetxt(gibbs_path + "Q_example.dat", Q)
+    # MEAN AND COVARIANCE COMPUTATION
+    print("Compute mean and covariance")
+    Cb, Q = get_Cb_and_Q(A, vec_data, vec_fg, invcov)
+    np.savetxt(gibbs_path + "Cb_example.dat", Cb)
+    np.savetxt(gibbs_path + "Q_example.dat", Q)
 
-# SIMULATION TESTS
-from corr_coeff_utils import svd_pow
-NSIMS = 1000
-sims = []
-sqQ = svd_pow(Q, 0.5)
-for i in range(NSIMS):
-    sim = Cb + sqQ.dot(np.random.randn(len(Cb)))
-    sims.append(sim)
-sims = np.array(sims)
-mean_sim = np.mean(sims, axis = 0)
-std_sim = np.std(sims, axis = 0)
+    # SIMULATION TESTS
+    from corr_coeff_utils import svd_pow
+    NSIMS = 1000
+    sims = []
+    sqQ = svd_pow(Q, 0.5)
+    for i in range(NSIMS):
+        sim = Cb + sqQ.dot(np.random.randn(len(Cb)))
+        sims.append(sim)
+    sims = np.array(sims)
+    mean_sim = np.mean(sims, axis = 0)
+    std_sim = np.std(sims, axis = 0)
 
-import matplotlib.pyplot as plt
-plt.figure()
+    import matplotlib.pyplot as plt
+    plt.figure()
 
 
-for i in range(NSIMS):
-    plt.plot(ell_cmb, sims[i], color = "gray", alpha = 0.5)
-plt.plot(ell_cmb, mean_sim, color = "tab:red", lw = 2)
-plt.yscale('log')
-plt.show()
-"""
+    for i in range(NSIMS):
+        plt.plot(ell_cmb, sims[i], color = "gray", alpha = 0.5)
+    plt.plot(ell_cmb, mean_sim, color = "tab:red", lw = 2)
+    plt.yscale('log')
+    plt.show()
+
+if __name__ == "__main__":
+    main()

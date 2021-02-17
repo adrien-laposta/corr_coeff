@@ -5,8 +5,9 @@ from corr_coeff_utils import *
 
 class GibbsSampler:
 
-    def __init__(self, Nsteps, Likelihood, resume, chains_path, gibbs_path, output_path, A_file,
-                 init_cmb_file,cov_fg_file, parameters):
+    def __init__(self, Nsteps, Likelihood, resume, chains_path,
+                 gibbs_path, output_path, A_file, init_cmb_file,
+                 cov_fg_file, mode, parameters):
         
         print("[gibbs] Initializing ...")
         ## MCMC
@@ -51,6 +52,7 @@ class GibbsSampler:
         self.logprior = Likelihood.logprior
 
         # Data
+        self.mode = mode
         self.A = np.loadtxt(output_path + gibbs_path + A_file)
         if self.resume:
             with open(self.savepath + "cmb.dat", "r") as file:
@@ -62,7 +64,7 @@ class GibbsSampler:
             self.init_cmb = np.loadtxt(output_path + gibbs_path + init_cmb_file)
         self.invQ = (self.A.T).dot(self.Likelihood.invcov).dot(self.A)
         self.Q = np.linalg.inv(self.invQ)
-
+        self.sqQ = svd_pow(self.Q, 0.5)
         try:
             cov_pars = ["Aplanck", "c0", "c1", "c3", "c4",
                         "c5", "Aradio", "Adusty", "AdustTT", 
@@ -146,7 +148,9 @@ class GibbsSampler:
                                       self.Likelihood.nmap,
                                       self.Likelihood.nfreq,
                                       self.Likelihood.frequencies,
-                                      self.Likelihood.binning)
+                                      self.Likelihood.binning,
+                                      self.mode)
+        np.savetxt("/sps/litebird/Users/alaposta/development/corr_coeff/python_products/gibbs_inputs/fg_init_vec.dat", current_fg)
         current_cmb = self.init_cmb
         import time
         st=time.time()
@@ -172,6 +176,7 @@ class GibbsSampler:
             current_like, _ = self.logprob(fg_vec = current_fg, 
                                            C_CMB = self.A.dot(current_cmb),
                                            **current_point)
+            print(current_like)
             current_prior = self.logprior(**current_point)
 
             # New state (from current state CMB)
@@ -188,9 +193,9 @@ class GibbsSampler:
                 Cb, _ = get_Cb_and_Q(self.A, self.Likelihood.data,
                                      new_fg, self.Likelihood.invcov,
                                      get_Q=False, Q=self.Q)
-                sqQ = svd_pow(self.Q, 0.5)
-                new_cmb = Cb + sqQ.dot(np.random.randn(len(Cb)))
                 
+                new_cmb = Cb + self.sqQ.dot(np.random.randn(len(Cb)))
+                #new_cmb = current_cmb
 
                 # Set accepted point to current point
                 current_point = new_point
@@ -203,11 +208,19 @@ class GibbsSampler:
                 cmb_accepted.append(new_cmb)
                 accep_count += 1
             else:
+                if i ==0:
+                    Cb, _ = get_Cb_and_Q(self.A, self.Likelihood.data,
+                                         current_fg, self.Likelihood.invcov,
+                                         get_Q=False, Q=self.Q)
+                new_cmb = Cb + self.sqQ.dot(np.random.randn(len(Cb)))
+                #new_cmb = current_cmb
+                current_cmb = new_cmb
 
                 # Store current sample if new was rejected
                 vec = [current_point[key] for key in current_point.keys()]
                 accepted.append(vec + [current_like])
-                cmb_accepted.append(current_cmb)
+                #cmb_accepted.append(current_cmb)
+                cmb_accepted.append(new_cmb)
             
             if self.resume:
                 accept_rates.append(accep_count / (i + 1 + Nresume))
