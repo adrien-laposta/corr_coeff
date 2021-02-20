@@ -26,13 +26,13 @@ parameters = {"cosmomc_theta": 0.0104064,
               "ombh2": 0.02216,
               "omch2": 0.1195,
               "tau": 0.0536,
-              "Aplanck": 9.997e-1,
-              "c0": 7.064e-4,
-              "c1": 4.000e-3,
+              "Aplanck": 1, #9.997e-1,
+              "c0": 0.0, #7.064e-4,
+              "c1": 0.0, #4.000e-3,
               "c2": 0,
-              "c3": -6.344e-4,
-              "c4": -1.432e-3,
-              "c5": -2.863e-3,
+              "c3": 0.0, #-6.344e-4,
+              "c4": 0.0, #-1.432e-3,
+              "c5": 0.0, #-2.863e-3,
               "Aradio": 1.698,
               "Adusty": 6.258e-1,
               "AdustTT": 8.649e-1,
@@ -633,7 +633,7 @@ base_ell = np.concatenate((np.concatenate(base_ellTT),
 
 modes = ["TT", "EE", "TE"]
 RL = False
-CL = False
+CL = True
 
 np.savetxt("../python_products/sims/bf_input.dat", base_vec)
 np.savetxt("../python_products/sims/ell.dat", base_ell)
@@ -657,9 +657,9 @@ if CL:
         sim = get_sim(base_vec, sqrcov)
         sims.append(sim)
         #np.savetxt("../python_products/sims/sim%02d.dat"%i, get_sim(base_vec, sqrcov))
-        np.savetxt("../python_products/sims/sim%02d.dat" % i, sim)
+        #np.savetxt("../python_products/sims/sim%02d.dat" % i, sim)
     print(sims[0]-sims[1])
 
     
     for i, elem in enumerate(sims):
-        np.savetxt("../python_products/sims/sim_{}.dat".format(i), elem)
+        np.savetxt("../python_products/sims/sim_nc_{}.dat".format(i), elem)

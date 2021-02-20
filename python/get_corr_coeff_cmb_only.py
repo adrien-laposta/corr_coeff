@@ -55,23 +55,26 @@ def get_full_A_matrix(ells, lims, binning):
 def get_full_fg_vec(pars, fgs, spectra_path, multipole_range,
                     nmap, nfreq, frequencies, binning, mode = "all"):
 
-    _, specfgTT, _ = get_fg_xfreq_vec(pars, fgs, spectra_path, multipole_range,
-                                      nmap, nfreq, frequencies, 0, binning)
-    _, specfgEE, _ = get_fg_xfreq_vec(pars, fgs, spectra_path, multipole_range,
-                                      nmap, nfreq, frequencies, 1, binning)
-    _, specfgTE, _ = get_fg_xfreq_vec(pars, fgs, spectra_path, multipole_range,
-                                      nmap, nfreq, frequencies, 2, binning)
+    _, specfgTT, _, gammaTT = get_fg_xfreq_vec(pars, fgs, spectra_path, multipole_range,
+                                               nmap, nfreq, frequencies, 0, binning)
+    _, specfgEE, _, gammaEE = get_fg_xfreq_vec(pars, fgs, spectra_path, multipole_range,
+                                               nmap, nfreq, frequencies, 1, binning)
+    _, specfgTE, _, gammaTE = get_fg_xfreq_vec(pars, fgs, spectra_path, multipole_range,
+                                               nmap, nfreq, frequencies, 2, binning)
     
     if mode == "tt":
-        return(np.concatenate(specfgTT))
+        return(np.concatenate(specfgTT), np.concatenate(gammaTT))
     elif mode == "ee":
-        return(np.concatenate(specfgEE))
+        return(np.concatenate(specfgEE), np.concatenate(gammaEE))
     elif mode == "te":
-        return(np.concatenate(specfgTE))
+        return(np.concatenate(specfgTE), np.concatenate(gammaTE))
     elif mode == "all":
         return(np.concatenate((np.concatenate(specfgTT),
                                np.concatenate(specfgEE),
-                               np.concatenate(specfgTE))))
+                               np.concatenate(specfgTE))),
+               np.concatenate((np.concatenate(gammaTT),
+                               np.concatenate(gammaEE),
+                               np.concatenate(gammaTE))))
 
 def get_Cb_and_Q(A, vec_data, vec_fg, invcov, get_Q = True,Q=None):
     

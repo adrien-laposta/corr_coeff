@@ -412,27 +412,38 @@ def compute_fgcal(pars, fgs, nmap, mode):
     for fg in fgs[mode]:
         dlmodel += fg.compute_dl(pars)
     spec = np.array([dlmodel[xs] * cal[xs] for xs in range(nxspec)])
-    
-    return(spec)
+    cal = np.array([cal[xs] for xs in range(nxspec)])
+
+    return(spec, cal)
 
 def get_fg_xfreq_vec(pars, fgs, dlweight, multipole_range, nmap, 
                      nfreq, frequencies, mode, binning):
-    #import time
-    #st=time.time()
-    #print("t1 : {}".format(time.time()-st))
-    data = compute_fgcal(pars, fgs, nmap, mode)
-    #print("t2 : {}".format(time.time()-st))
+    
+    data, cal = compute_fgcal(pars, fgs, nmap, mode)
+
     if mode != 2:
+
         data = xspectra2xfreq(data, dlweight[mode], nmap, nfreq, frequencies, multipole_range, normed = True)
-        #print("t3 : {}".format(time.time()-st))
+        cal = xspectra2xfrea(cal, dlweight[mode], nmap, nfreq, frequencies, multipole_rangem normed = True)
+
         ell, spectra, lims = select_spectra(data, nmap, nfreq, frequencies, binning, multipole_range, mode)
-        #print("t4 : {}".format(time.time()-st))
+        ell, gamma, lims = select_spectra(cal, nmap, nfreq, frequencies, binning, multipole_range, mode)
+
     elif mode == 2:
+
         dataTE, WTE = xspectra2xfreq(data, dlweight[mode], nmap, nfreq, frequencies, multipole_range, normed = False)
-        data = compute_fgcal(pars, fgs, nmap, 3)
+        calTE, WTE = xspectra2xfreq(cal, dlweight[mode], nmap, nfreq, frequencies, multipole_range, normed = False)
+
+        data, cal = compute_fgcal(pars, fgs, nmap, 3)
+
         dataET, WET = xspectra2xfreq(data, dlweight[3], nmap, nfreq, frequencies, multipole_range, normed = False)
+        calET, WET = xspectra2xfreq(cal, dlweight[3], nmap, nfreq, frequencies, multipole_range, normed = False)
+
         W = WTE + WET
         data = dataTE + dataET
+        cal = calTE + calET
+
         ell, spectra, lims = select_spectra(data/W, nmap, nfreq, frequencies, binning, multipole_range, mode)
-    
-    return(ell, spectra, lims)
+        ell, gamma, lims = select_spectra(cal/W, nmap, nfreq, frequencies, binning, multipole_range, mode)
+
+    return(ell, spectra, lims, gamma)

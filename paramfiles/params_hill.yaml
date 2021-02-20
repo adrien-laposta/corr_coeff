@@ -8,17 +8,19 @@ multipole_range_file: "/sps/litebird/Users/alaposta/development/corr_coeff/hilli
 invcov_file: "cov/invfll_NPIPE_detset_extl_TTTEEE_bin.fits"
 binning_file: "binning_corr_coeff.fits"
 
-init_cmb_file: "Cb_example.dat"
+init_cmb_file: "Cb_sim0.dat"
 A_file: "A.dat"
 cov_fg_file: "cov_fg.dat"
 
-chains_path: "/sps/litebird/Users/alaposta/development/corr_coeff/gibbs_v5/"
+mode: "all"
+chains_path: "/sps/litebird/Users/alaposta/development/corr_coeff/tgibbs/"
 
 # Parameters
 parameters:
 
   Aplanck:
-    init: 1
+    value: 1 #0.9997
+    init: 0.9997
     proposal: 0.0006
     prior:
       type: norm
@@ -26,6 +28,7 @@ parameters:
       std: 0.0025
 
   c0:
+    value: 0 #7.064e-4
     init: 0.0
     proposal: 0.0005
     prior:
@@ -34,7 +37,8 @@ parameters:
       std: 0.002
 
   c1:
-    init: 0.0
+    value: 0 #4.000e-3
+    init: 4.000e-3
     proposal: 0.0005
     prior:
       type: norm
@@ -45,7 +49,8 @@ parameters:
     value: 0.0
 
   c3:
-    init: 0.0
+    value: 0 #-6.344e-4
+    init: -6.344e-4
     proposal: 0.0005
     prior:
       type: norm
@@ -53,7 +58,8 @@ parameters:
       std: 0.002
 
   c4:
-    init: 0.0
+    value: 0 #-1.432e-3
+    init: -1.432e-3
     proposal: 0.0005
     prior:
       type: norm
@@ -61,7 +67,8 @@ parameters:
       std: 0.002
 
   c5:
-    init: 0.0
+    value: 0 #-2.863e-3
+    init: -2.863e-3
     proposal: 0.0005
     prior:
       type: norm
@@ -69,7 +76,7 @@ parameters:
       std: 0.002
 
   Aradio:
-    init: 1.61984
+    init: 1.698
     proposal: 0.025
     prior:
       type: norm
@@ -77,7 +84,8 @@ parameters:
       std: 0.2
 
   Adusty:
-    init: 0.781192
+    #value: 6.258e-1
+    init: 6.258e-1
     proposal: 0.02
     prior:
       type: norm
@@ -85,7 +93,8 @@ parameters:
       std: 0.2
 
   AdustTT:
-    init: 1
+    #value: 8.649e-1
+    init: 8.649e-1
     proposal: 0.015
     prior:
       type: norm
@@ -93,7 +102,8 @@ parameters:
       std: 0.2
 
   AdustPP:
-    init: 1
+    #value: 1.156
+    init: 1.156
     proposal: 0.025
     prior:
       type: norm
@@ -101,7 +111,8 @@ parameters:
       std: 0.2
 
   AdustTP:
-    init: 1
+    #value: 1.092
+    init: 1.092
     proposal: 0.025
     prior:
       type: norm
@@ -109,7 +120,8 @@ parameters:
       std: 0.2
 
   Asz:
-    init: 1
+    #value: 1.155
+    init: 1.155
     proposal: 0.04
     prior:
       type: norm
@@ -117,7 +129,8 @@ parameters:
       std: 0.2
 
   Acib:
-    init: 1
+    #value: 1.070
+    init: 1.070
     proposal: 0.025
     prior:
       type: norm
@@ -126,7 +139,7 @@ parameters:
 
   Aksz:
     value: 0
-    init: 0.6
+    init: 0
     proposal: 0.015
     prior:
       type: flat
@@ -135,7 +148,7 @@ parameters:
 
   Aszxcib:
     value: 0
-    init: 1
+    init: 0
     proposal: 0.015
     prior:
       type: flat

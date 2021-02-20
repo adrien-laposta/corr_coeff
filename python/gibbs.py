@@ -142,14 +142,14 @@ class GibbsSampler:
         current_point = self.init_pars
         current_fgpars = current_point.copy()
         current_fgpars = {**current_fgpars, **self.fixed}
-        current_fg  = get_full_fg_vec(current_fgpars, self.Likelihood.fgs,
-                                      self.Likelihood.dlweight,
-                                      self.Likelihood.multipole_range,
-                                      self.Likelihood.nmap,
-                                      self.Likelihood.nfreq,
-                                      self.Likelihood.frequencies,
-                                      self.Likelihood.binning,
-                                      self.mode)
+        current_fg, current_gamma = get_full_fg_vec(current_fgpars, self.Likelihood.fgs,
+                                                    self.Likelihood.dlweight,
+                                                    self.Likelihood.multipole_range,
+                                                    self.Likelihood.nmap,
+                                                    self.Likelihood.nfreq,
+                                                    self.Likelihood.frequencies,
+                                                    self.Likelihood.binning,
+                                                    self.mode)
         np.savetxt("/sps/litebird/Users/alaposta/development/corr_coeff/python_products/gibbs_inputs/fg_init_vec.dat", current_fg)
         current_cmb = self.init_cmb
         import time
@@ -173,14 +173,14 @@ class GibbsSampler:
             new_point = self.proposal(current_point)
        
             # Current state 
-            current_like, _ = self.logprob(fg_vec = current_fg, 
-                                           C_CMB = self.A.dot(current_cmb),
-                                           **current_point)
+            current_like, _, _ = self.logprob(fg_vec = current_fg, 
+                                              C_CMB = self.A.dot(current_cmb),
+                                              **current_point)
             print(current_like)
             current_prior = self.logprior(**current_point)
 
             # New state (from current state CMB)
-            new_like, new_fg = self.logprob(fg_vec = None,
+            new_like, new_fg, new_gamma = self.logprob(fg_vec = None,
                                             C_CMB = self.A.dot(current_cmb), 
                                             **{**new_point, **self.fixed})
             new_prior = self.logprior(**new_point)

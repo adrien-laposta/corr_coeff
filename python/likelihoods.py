@@ -50,7 +50,7 @@ class LikelihoodFg:
             #self.data = np.concatenate((np.concatenate(CellTT),
             #                           np.concatenate(CellEE),
             #                           np.concatenate(CellTE)))
-        self.data = np.loadtxt("/sps/litebird/Users/alaposta/development/corr_coeff/python_products/sims/sim_0.dat")[:318]
+        self.data = np.loadtxt("/sps/litebird/Users/alaposta/development/corr_coeff/python_products/sims/sim_nc_9.dat")[:318]
         # Load invcovmat
         self.invcov = fits.getdata(output_path + invcov_file, hdu=0).field(0)
         N = int(np.sqrt(len(self.invcov)))
@@ -107,11 +107,11 @@ class LikelihoodFg:
     def logprob(self, fg_vec, C_CMB, **pars):
         
         if fg_vec is None:
-            fg_vec = get_full_fg_vec(pars, self.fgs, self.dlweight,
-                                     self.multipole_range, self.nmap,
-                                     self.nfreq, self.frequencies, self.binning,
-                                     self.mode)
+            fg_vec, gamma_vec = get_full_fg_vec(pars, self.fgs, self.dlweight,
+                                                self.multipole_range, self.nmap,
+                                                self.nfreq, self.frequencies, self.binning,
+                                                self.mode)
 
         res = (self.data - (fg_vec + C_CMB))
 
-        return(-0.5 * res.dot(self.invcov).dot(res), fg_vec)
+        return(-0.5 * res.dot(self.invcov).dot(res), fg_vec, gamma_vec)
